@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Runs the Job DSL generator to create the pipeline. Also sets up the initial gemset, and runs a Cucumber test to ensure that the jobs were correctly created.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+  <hudson.model.ParametersDefinitionProperty>
+    <parameterDefinitions>
+    <hudson.model.StringParameterDefinition>
+    <name>env_repo_name</name>
+    <description/>
+    <defaultValue>gcb_environment-lawnmower</defaultValue>
+    </hudson.model.StringParameterDefinition>
+    </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+</properties>
+  <scm class="org.jenkinsci.plugins.multiplescms.MultiSCM" plugin="multiple-scms@0.6">
+  <scms>
+  <hudson.plugins.git.GitSCM plugin="git@2.4.1">
+  <configVersion>2</configVersion>
+  <userRemoteConfigs>
+  <hudson.plugins.git.UserRemoteConfig>
+  <url><%= @source_repo %></url>
+  </hudson.plugins.git.UserRemoteConfig>
+  </userRemoteConfigs>
+  <branches>
+  <hudson.plugins.git.BranchSpec>
+  <name>*/master</name>
+  </hudson.plugins.git.BranchSpec>
+  </branches>
+  <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+  <submoduleCfg class="list"/>
+  <extensions>
+  <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+  <relativeTargetDir>orchestrator</relativeTargetDir>
+  </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+  </extensions>
+  </hudson.plugins.git.GitSCM>
+  <hudson.plugins.git.GitSCM plugin="git@2.4.1">
+  <configVersion>2</configVersion>
+  <userRemoteConfigs>
+  <hudson.plugins.git.UserRemoteConfig>
+  <url><%= @env_repo %></url>
+  </hudson.plugins.git.UserRemoteConfig>
+  </userRemoteConfigs>
+  <branches>
+  <hudson.plugins.git.BranchSpec>
+  <name>*/master</name>
+  </hudson.plugins.git.BranchSpec>
+  </branches>
+  <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+  <submoduleCfg class="list"/>
+  <extensions>
+  <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+  <relativeTargetDir>environment</relativeTargetDir>
+  </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+  </extensions>
+  </hudson.plugins.git.GitSCM>
+  </scms>
+</scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+    <command>#!/bin/bash -l
+cd orchestrator
+curl -o snakeyaml.jar https://repo1.maven.org/maven2/org/yaml/snakeyaml/1.16/snakeyaml-1.16.jar
+    </command>
+    </hudson.tasks.Shell>
+    <javaposse.jobdsl.plugin.ExecuteDslScripts plugin="job-dsl@1.37">
+      <targets>orchestrator/pipeline/jobdsl.groovy</targets>
+      <usingScriptText>false</usingScriptText>
+      <ignoreExisting>false</ignoreExisting>
+      <removedJobAction>IGNORE</removedJobAction>
+      <removedViewAction>IGNORE</removedViewAction>
+      <lookupStrategy>JENKINS_ROOT</lookupStrategy>
+      <additionalClasspath>orchestrator/snakeyaml.jar</additionalClasspath>
+    </javaposse.jobdsl.plugin.ExecuteDslScripts>
+    <hudson.tasks.Shell>
+      <command># run some tests for your jobs here</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+    <artifacts>**</artifacts>
+    <allowEmptyArchive>false</allowEmptyArchive>
+    <onlyIfSuccessful>true</onlyIfSuccessful>
+    <fingerprint>false</fingerprint>
+    <defaultExcludes>true</defaultExcludes>
+    <caseSensitive>true</caseSensitive>
+    </hudson.tasks.ArtifactArchiver>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.1">
+      <colorMapName>xterm</colorMapName>
+    </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+  </buildWrappers>
+</project>

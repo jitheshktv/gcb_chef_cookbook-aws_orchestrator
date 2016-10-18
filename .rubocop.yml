@@ -1,0 +1,22 @@
+# do favor top-down code vs. left-right, but use your best judgement and don't hassle me about it
+Metrics/LineLength:
+  Max: 360
+
+# style guide just says "bad" to use and/or.  someone needs to explain the problem here?
+# would favor natural language over symbology generally speaking...
+Style/AndOr:
+  Enabled: false
+
+# I value my space for readability
+Lint/AmbiguousRegexpLiteral:
+  Exclude:
+    - '**/*_spec.rb'
+
+# json-rules look less intimidating and code-like with the { imho
+Style/BlockDelimiters:
+  Exclude:
+    - '**/cfn-validations/**/*.rb'
+
+AllCops:
+  Exclude:
+    - 'Vagrantfile'

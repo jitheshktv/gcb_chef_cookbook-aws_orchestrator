@@ -1,0 +1,6 @@
+.kitchen
+.vagrant
+files/default/orchestrator/tech_stacks/*
+!files/default/orchestrator/tech_stacks/manifest.yml
+.idea
+

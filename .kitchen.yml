@@ -1,0 +1,37 @@
+---
+driver:
+  name: vagrant
+
+  # sync your ssh folder for now in order to pull other code-commit repos
+  # make sure your pem file for codecommit is also in this directory
+  # otherwise it won't be properly shared and available during convergence
+  synced_folders:
+    - ["~/.ssh", "/root/.ssh", "owner: 'root', group: 'root'"]
+    - ["~/.aws", "/root/.aws", "owner: 'root', group: 'root'"]
+    - ["~/.aws", "/home/vagrant/.aws" ]
+    - ["./", "/home/vagrant/cookbook" ]
+
+  network:
+    - ["forwarded_port", {guest: 8080, host: 3333}]
+
+provisioner:
+  name: chef_zero
+
+# Uncomment the following verifier to leverage Inspec instead of Busser (the
+# default verifier)
+# verifier:
+#   name: inspec
+
+platforms:
+  - name: centos-7.1
+  #- name: nrel/CentOS-6.5-x86_64
+
+suites:
+  - name: default
+    run_list:
+      - recipe[cti_orchestrator::default]
+    attributes:
+      run_mode: <%=ENV['RUN_MODE']%>
+      git:
+        repo:
+          environment: <%= if ENV['ENV_REPO_NAME'].nil? then fail "Must set env var ENV_REPO_NAME" else ENV['ENV_REPO_NAME']; end %>
